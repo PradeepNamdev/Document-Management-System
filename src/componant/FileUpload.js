@@ -1,6 +1,8 @@
 import React from 'react';
 import { useState } from 'react';
 import service from '../service/service';
+import swal from 'sweetalert';
+import Dashboard from './dashboard';
 
 
 
@@ -13,15 +15,36 @@ function FileUpload(props) {
             file: '',
         }
     )
+    const [checkBox, setCheckBox] = useState(false);
+    const [show, setShow] = useState();
     const selectFile = (event) => {
+        let fi = document.getElementById('file');
+        var files = fi.files;
+        for (var i = 0; i < files.length; i++) {
+            if (files[i].type == "application/x-zip-compressed") {
+                setShow(true);
+            } else {
+                setShow(false);
+            }
+            // console.log("Filename: " + files[i].name);
+            // console.log("Type: " + files[i].type);
+            // console.log("Size: " + files[i].size + " bytes");
+        }
         setabc({
             selectedFiles: event.target.files,
         });
     }
-
+    const [errorMsg, setErrorMsg] = useState();
     const upload = () => {
         const duration = document.getElementById("duration");
         const file_name = document.getElementById("file_name");
+        if (file_name.value === "") {
+            return setErrorMsg("* Please Enter File Name")
+        }
+        if (duration.value === "") {
+            return setErrorMsg("* Please Enter File Duration")
+        }
+
         let fileName = file_name.value;
         let durationMin = duration.value;
         let fi = document.getElementById('file');
@@ -32,7 +55,7 @@ function FileUpload(props) {
                 const file = Math.round((fsize / 102400));
                 // The size of the file.
                 if (file >= 102400) {
-                    alert("File size exceeded Max Size 100 MB!!");
+                    swal("Warning!", "File size exceeded Max Size 100 MB!!", "warning");
                 }
             }
         }
@@ -40,12 +63,11 @@ function FileUpload(props) {
         setabc({
             currentFile: currentFile,
         });
-        service.fileUpload(currentFile, props.user_id, props.dir_name, durationMin, fileName, (event) => {
-        }).then(res => {
-            console.log(res);
+        service.fileUpload(currentFile, props.user_id, props.dir_name, durationMin, fileName, checkBox, (event) => {
+        }).then(async res => {
             if (res.status === 200) {
-                alert("File Uploaded Succesfully");
-                window.location.reload();
+                await swal("Message!", res.data, "info");
+                <Dashboard user_id={props.user_id} dir_name={props.dir_name} />
             }
         })
             .catch(err => {
@@ -68,17 +90,27 @@ function FileUpload(props) {
             <div style={{ marginLeft: 10, color: 'red' }}>
                 <span>Upload files (Max Size 100 MB)</span>
             </div>
+            <div style={{ marginLeft: 10, color: 'red' }}>
+                <span>Required Files (pdf, jpg, mp4, doc, text, zip, scorm)</span>
+            </div>
             <div class="mb-3 mt-3">
                 <label for="name">File Name : </label>
                 <input type="text" class="form-control" id="file_name" placeholder="Enter File Name" name="file_name" />
+                <span style={{ color: "red" }}>{errorMsg}</span>
             </div>
             <div class="mb-3 mt-3">
-                <label for="name">Duration : </label>
-                <input type="number" class="form-control" min="0" max="60" id="duration" placeholder="Enter Duration" name="duration" />
+                <label for="name">Duration in Minutes : </label>
+                <input type="number" class="form-control" min="0" max="60" id="duration" placeholder="Duration in Minutes" name="duration" />
+                <span style={{ color: "red" }}>{errorMsg}</span>
             </div>
             <div class="mb-3 mt-3">
                 <input type="file" class="form-control" onChange={selectFile} accept="*" id="file" />
             </div>
+            {show == true ? <div class="mb-3 mt-3">
+                <label for="name">Scorm Zip &nbsp; </label>
+                <input type="checkbox" id="ScormCheckbox" onClick={() => setCheckBox(true)} data-toggle="toggle" data-onstyle="primary"></input>
+            </div> : null}
+
             <button className="btn btn-success" disabled={!getabc.selectedFiles} onClick={() => upload()}>Upload</button>
         </div>
     );

@@ -34,7 +34,7 @@ ul, #myUL {
     vertical-align: middle;
     font-weight:900;
     font-size: 20px;
-    color: aqua;
+    color: black;
   }
   
   .nested {
@@ -98,9 +98,9 @@ ul.tree, ul.tree ul {
  }
 
 
+
+
     /* Footer */
-
-
 section {
     padding: 0 0;
 }
@@ -174,5 +174,86 @@ section .section-title {
     margin-bottom: 10px;
 }
 }
+
+
+/*Share url code css */
+
+* {
+  margin:0px;
+  padding:0px;
+  box-sizing:border-box;
+}
+
+.container {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
+.copy-text {
+  position:relative;
+  padding:10px;
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:10px;
+  display:flex;
+}
+.copy-text input.text {
+  padding:10px;
+  font-size:18px;
+  color:#555;
+  border:none;
+  outline:none;
+  padding-right:50px;
+}
+.copy-text button {
+  padding:10px;
+  background:#5784f5;
+  color:#fff;
+  font-size:18px;
+  border:none;
+  outline:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+.copy-text button:active {
+  background:#809ce2;
+}
+.copy-text button:before {
+  content:"Copied";
+  position:absolute;
+  top:-45px;
+  right:35px;
+  background:#5c81dc;
+  padding:8px 10px;
+  border-radius:20px;
+  font-size:15px;
+  display: none;
+}
+.copy-text button:after {
+  content:"";
+  position:absolute;
+  top:-13px;
+  right:63px;
+  width:10px;
+  height:10px;
+  background:#5c81dc;
+  transform:rotate(45deg);
+  display: none;
+}
+.copy-text.active button:before,
+.copy-text.active button:after {
+  display:block;
+}
+
+
+.video-js .vjs-big-play-button {
+  left: 45% !important;
+  top: 45% !important;
+  width: 20%;
+  height: 20%;
+}
+
 
   

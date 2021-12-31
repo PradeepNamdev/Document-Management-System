@@ -15,13 +15,14 @@ class service {
         return axios.get(DMS_URL + "getDirectories/" + userId);
     }
 
-    fileUpload(file, user_id, dir_name, durationInMinutes, contentName) {
+    fileUpload(file, user_id, dir_name, durationInMinutes, contentName, checkBox) {
         let formData = new FormData();
         formData.append("file", file);
         formData.append("user_id", user_id)
         formData.append("dir_name", dir_name);
         formData.append("durationInMinutes", durationInMinutes);
         formData.append("contentName", contentName);
+        formData.append("zipStatus", checkBox);
         return axios.post(DMS_URL + "fileUpload/", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
@@ -43,6 +44,14 @@ class service {
 
     fileCotentDetailsUpdate(data) {
         return axios.post(DMS_URL + "updateContent", data)
+    }
+
+    folderNameUpdate(data) {
+        return axios.post(DMS_URL + "updateDirectory", data);
+    }
+
+    contentAccess(url) {
+        return axios.get(url); 
     }
 
 }
