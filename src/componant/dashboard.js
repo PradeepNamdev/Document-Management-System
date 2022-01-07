@@ -9,7 +9,6 @@ import FilterComponent from './FilterComponent';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import swal from 'sweetalert';
 
-
 const customStyles = {
     title: {
         style: {
@@ -37,6 +36,7 @@ const customStyles = {
 
 function Dashboard() {
     const [errorMsg, setErrorMsg] = useState();
+    const [getLoading, setLoading] = useState();
     const [getUploadModalState, setUploadModalState] = useState({
         show: false
     });
@@ -89,12 +89,13 @@ function Dashboard() {
             service.createDirectory(register)
                 .then(async response => {
                     if (response.status == 201) {
-                        await swal("Created!", "Your Folder Created.", "success");
+                        await swal("Created!", "Your Root Folder Created.", "success");
                         service.getFolderStructure("19f4bfda-4ec5-4e74-8b38-bcc15399e866")
                             .then(res => {
                                 setFolder(res.data);
                             })
                         setModalState(false);
+                        setParentId([]);
                     } else {
                         alert("some error");
                     }
@@ -111,6 +112,7 @@ function Dashboard() {
                                 setFolder(res.data);
                             })
                         setModalState(false);
+                        setParentId([]);
                     } else {
                         alert("some error");
                     }
@@ -573,10 +575,16 @@ function Dashboard() {
         setabc({
             currentFile: currentFile,
         });
+        setLoading(true);
         service.fileUpload(currentFile, "19f4bfda-4ec5-4e74-8b38-bcc15399e866", getParentId, durationMin, fileName, checkBox, (event) => {
         }).then(async res => {
             if (res.status === 200) {
-                await swal("Message!", res.data, "info");
+                setLoading(false);
+                if (res.data === "Uploaded Successfully") {
+                    await swal("Successfully Upload !", res.data, "success");
+                } else {
+                    await swal("Message!", res.data, "info");
+                }
                 setUploadModalState({ show: false });
                 service.contentDetails(getParentId, "19f4bfda-4ec5-4e74-8b38-bcc15399e866")
                     .then(res => {
@@ -613,49 +621,57 @@ function Dashboard() {
                         <hr />
                     </div>
                     <div class="col-10 bd-highlight">
-                        <nav class="navbar navbar-expand-lg navbar-light bg-light" style={{ borderBottom: "1px inset" }}>
-                            <div class="container-fluid">
-                                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                                    <div class="navbar-nav">
-                                        <a class="nav-link" href="#" onClick={() => handleModal()}><i className="fas fa-folder-plus" style={{ fontSize: "25px", marginRight: "5px" }}></i>Create</a>&nbsp;&nbsp;
-                                        {getParentId.length == 0 ?
-                                            <a class="nav-link" href="#" onClick={() => alertMsg()} ><i className="fa fa-file-upload" style={{ fontSize: "25px", marginRight: "5px" }}></i>Upload</a>
-                                            : <a class="nav-link" href="#" onClick={() => FileUploadModalShow()}><i className="fa fa-file-upload" style={{ fontSize: "25px", marginRight: "5px" }}></i>Upload</a>
-                                        }
+                        <div class="shadow-lg bg-body rounded">
+                            <nav class="navbar navbar-expand-lg navbar-light bg-light" style={{ borderBottom: "1px inset" }}>
+                                <div class="container-fluid">
+                                    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                                        <div class="navbar-nav">
+                                            <a class="nav-link" href="#" onClick={() => handleModal()}><i className="fas fa-folder-plus" style={{ fontSize: "25px", marginRight: "5px" }}></i>Create</a>&nbsp;&nbsp;
+                                            {getParentId.length == 0 ?
+                                                <a class="nav-link" href="#" onClick={() => alertMsg()} ><i className="fa fa-file-upload" style={{ fontSize: "25px", marginRight: "5px" }}></i>Upload</a>
+                                                : <a class="nav-link" href="#" onClick={() => FileUploadModalShow()}><i className="fa fa-file-upload" style={{ fontSize: "25px", marginRight: "5px" }}></i>Upload</a>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </nav>
-                        <nav class="navbar navbar-expand-lg navbar-light bg-light" style={{ borderBottom: "1px inset" }}>
-                            <div class="container-fluid">
-                                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                                    <div class="navbar-nav">
-                                        <a class="nav-link">MyFiles   &nbsp;&nbsp;
-                                            <i className="fa fa-angle-right" ></i>
-                                        </a>
-                                        {getFolderName == null ? null :
-                                            <a class="nav-link" href="#" >
-                                                <i className="fa fa-folder-open" ></i> &nbsp;&nbsp;{getFolderName}
+                            </nav>
+                        </div>
+                        <div class="shadow-lg bg-body rounded">
+                            <nav class="navbar navbar-expand-lg navbar-light bg-light" style={{ borderBottom: "1px inset" }}>
+                                <div class="container-fluid">
+                                    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                                        <div class="navbar-nav">
+                                            <a class="nav-link">MyFiles   &nbsp;&nbsp;
+                                                <i className="fa fa-angle-right" ></i>
                                             </a>
-                                        }
+                                            {getFolderName == null ? null :
+                                                <a class="nav-link" href="#" >
+                                                    <i className="fa fa-folder-open" ></i> &nbsp;&nbsp;{getFolderName}
+                                                </a>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </nav>
-                        <Card>
-                            <DataTable
-                                columns={columns}
-                                data={filteredItems}
-                                defaultSortField="Name"
-                                defaultSortAsc={true}
-                                striped
-                                pagination
-                                highlightOnHover
-                                customStyles={customStyles}
-                                subHeader
-                                subHeaderComponent={subHeaderComponent}
-                            />
-                        </Card>
+                            </nav>
+                        </div>
+                        <div class="shadow-lg p-3 mb-5 bg-body rounded">
+                            {getContentDetails.length == 0 ? <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '20px' }}>There are no records to display</p> :
+                                <Card>
+                                    <DataTable
+                                        columns={columns}
+                                        data={filteredItems}
+                                        defaultSortField="Name"
+                                        defaultSortAsc={true}
+                                        striped
+                                        pagination
+                                        highlightOnHover
+                                        customStyles={customStyles}
+                                        subHeader
+                                        subHeaderComponent={subHeaderComponent}
+                                    />
+                                </Card>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -723,8 +739,17 @@ function Dashboard() {
                             <label for="name">Scorm Zip &nbsp; </label>
                             <input type="checkbox" id="ScormCheckbox" onClick={() => setCheckBox(true)} data-toggle="toggle" data-onstyle="primary"></input>
                         </div> : null}
+                        {getLoading ?
+                            <button class="btn btn-success" disabled>
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>   Upload
+                            </button> :
+                            <button className="btn btn-success" disabled={!getabc.selectedFiles} onClick={() => upload()}>
+                                Upload
+                            </button>
+                        }
 
-                        <button className="btn btn-success" disabled={!getabc.selectedFiles} onClick={() => upload()}>Upload</button>
                     </div>
                     {/* <FileUpload userId={props.userId} courseId={props.courseId} tenantId={props.tenantId} assignId={getAssignId} /> */}
                     {/* <FileUpload user_id={"19f4bfda-4ec5-4e74-8b38-bcc15399e866"} dir_name={getParentId} /> */}

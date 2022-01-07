@@ -7,7 +7,7 @@ import Dashboard from './dashboard';
 
 
 function FileUpload(props) {
-    // console.log("In assignment Upload" + props.userId + props.courseId + props.assignId);
+    
     const [getabc, setabc] = useState(
         {
             selectedFiles: undefined,
